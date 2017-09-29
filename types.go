@@ -68,6 +68,23 @@ func IsAlreadyExists(err error) bool {
 	return ok
 }
 
+type forbidden struct {
+	Err
+}
+
+// Forbiddenf returns an error which satisfies IsForbidden().
+func Forbiddenf(format string, args ...interface{}) error {
+	return &forbidden{wrap(nil, format, "", args...)}
+}
+
+// IsForbidden reports whether the error was created with
+// Forbiddenf().
+func IsForbidden(err error) bool {
+	err = Cause(err)
+	_, ok := err.(*forbidden)
+	return ok
+}
+
 type badRequest struct {
 	Err
 }

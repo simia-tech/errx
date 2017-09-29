@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"code.posteo.de/common/errx"
+	"github.com/simia-tech/errx"
 )
 
 func TestErrorf(t *testing.T) {
