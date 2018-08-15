@@ -15,7 +15,7 @@ func init() {
 	}
 	if ok {
 		size := len(file)
-		suffix := len("code.posteo.de/common/errx/path.go")
+		suffix := len("github.com/simia-tech/errx/path.go")
 		goPath = file[:size-suffix]
 		prefixSize = len(goPath)
 	}
