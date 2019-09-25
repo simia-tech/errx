@@ -9,32 +9,20 @@ import (
 	"github.com/simia-tech/errx"
 )
 
-func TestErrorf(t *testing.T) {
-	err := errx.Errorf("one %s", "two")
-	assert.Equal(t, "one two", err.Error())
-}
-
 func TestAnnotatef(t *testing.T) {
 	err := errx.Annotatef(errors.New("three"), "one %s", "two")
 	assert.Equal(t, "one two: three", err.Error())
 }
 
 func TestEqual(t *testing.T) {
-	testCases := []struct {
-		name   string
-		a      error
-		b      error
-		result bool
-	}{
-		{"Nil", nil, nil, true},
-		{"TwoAlreadyExists", errx.AlreadyExistsf("test"), errx.AlreadyExistsf("test"), true},
-		{"AlreadyExistsAndNotFound", errx.AlreadyExistsf("test"), errx.NotFoundf("test"), false},
-		{"AlreadyExistsAndNil", errx.AlreadyExistsf("test"), nil, false},
+	testFn := func(err, target error, expectResult bool) func(*testing.T) {
+		return func(t *testing.T) {
+			assert.Equal(t, expectResult, errors.Is(err, target))
+		}
 	}
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.result, errx.Equal(testCase.a, testCase.b))
-		})
-	}
+	t.Run("Nil", testFn(nil, nil, true))
+	t.Run("TwoAlreadyExists", testFn(errx.AlreadyExistsf("test"), errx.ErrConflict, true))
+	t.Run("AlreadyExistsAndNotFound", testFn(errx.AlreadyExistsf("test"), errx.ErrNotFound, false))
+	t.Run("AlreadyExistsAndNil", testFn(errx.AlreadyExistsf("test"), nil, false))
 }
