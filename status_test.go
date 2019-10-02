@@ -26,6 +26,24 @@ func TestStatusErr(t *testing.T) {
 	t.Run("WrappedHttpError", testFn(fmt.Errorf("wrap: %w", errx.ErrNotFoundf("not found")), http.StatusNotFound, "wrap: not found"))
 }
 
+func TestStatusWrite(t *testing.T) {
+	testFn := func(code int, contentType, expectBody string) func(*testing.T) {
+		return func(t *testing.T) {
+			statusErr := &errx.Status{Code: code}
+
+			rr := httptest.NewRecorder()
+			rr.Header().Set("Content-Type", contentType)
+			require.NoError(t, statusErr.Write(rr))
+
+			assert.Equal(t, code, rr.Code)
+			assert.Equal(t, expectBody, rr.Body.String())
+		}
+	}
+
+	t.Run("NotFoundText", testFn(http.StatusNotFound, "text/plain", "Not Found"))
+	t.Run("NotFoundJSON", testFn(http.StatusNotFound, "application/json", `{"error":"Not Found"}`))
+}
+
 func TestStatusWriteText(t *testing.T) {
 	testFn := func(code int, text string, expectBody string) func(*testing.T) {
 		return func(t *testing.T) {

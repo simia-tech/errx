@@ -73,6 +73,20 @@ func StatusErr(err error) *Status {
 	return &Status{Code: http.StatusInternalServerError, Text: err.Error()}
 }
 
+// Write writes code and text to the provided http response. The body format is determind by
+// the `Content-Type` header in the `http.ResponseWriter`.
+func (s *Status) Write(w http.ResponseWriter) error {
+	w.WriteHeader(s.Code)
+	switch ct := w.Header().Get("Content-Type"); ct {
+	case "application/json":
+		_, err := fmt.Fprintf(w, `{"error":%q}`, s.String())
+		return err
+	default:
+		_, err := io.WriteString(w, s.String())
+		return err
+	}
+}
+
 // WriteText writes code and text to a http response as plain text.
 func (s *Status) WriteText(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "text/plain")
