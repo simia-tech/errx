@@ -103,6 +103,14 @@ func (s Status) WriteJSON(w http.ResponseWriter) error {
 	return err
 }
 
+// Is helps `errors.Is`.
+func (s *Status) Is(err error) bool {
+	if statusErr, ok := err.(*Status); ok && statusErr.Code == s.Code {
+		return true
+	}
+	return false
+}
+
 func (s Status) String() string {
 	if s.Text == "" {
 		return http.StatusText(s.Code)
